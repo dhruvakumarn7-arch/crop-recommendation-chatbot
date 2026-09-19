@@ -1,0 +1,11 @@
+{
+  "name": "Crop Recommendation Chatbot",
+  "short_name": "CropBot",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#2E7D32",
+  "theme_color": "#2E7D32",
+  "description": "A beginner-friendly crop recommendation chatbot.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

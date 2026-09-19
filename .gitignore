@@ -1,0 +1,21 @@
+# Python virtual environment and cache
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+
+# Flutter build artifacts and dependencies
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/.packages
+frontend/.pub-cache/
+frontend/.pub/
+
+# Operating system & Editor files
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

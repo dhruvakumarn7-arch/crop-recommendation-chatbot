@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Advisor Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2E7D32;
+      --primary-light: #E8F5E9;
+      --primary-dark: #1B5E20;
+      --accent: #4CAF50;
+      --bg-page: #0F172A;
+      --bg-phone: #F8FAFC;
+      --bubble-bot: #FFFFFF;
+      --bubble-user: #2E7D32;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .header-banner {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .header-banner h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #81C784;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .header-banner p {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+
+    /* Mobile Device Frame */
+    .phone-mockup {
+      width: 100%;
+      max-width: 420px;
+      height: 720px;
+      background: var(--bg-phone);
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 10px #1E293B;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Mobile Status Bar */
+    .status-bar {
+      height: 24px;
+      background: var(--primary-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+
+    /* App Header */
+    .app-bar {
+      background: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .app-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: white;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .app-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #C8E6C9;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: #00E676;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00E676;
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Chat Area */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 8px;
+      max-width: 90%;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.bot {
+      align-self: flex-start;
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .bubble {
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .message-row.bot .bubble {
+      background: var(--bubble-bot);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      border: 1px solid #EEF2F6;
+    }
+
+    .message-row.user .bubble {
+      background: var(--bubble-user);
+      color: white;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);
+    }
+
+    .bot-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Quick Reply Chips */
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border: 1px solid #A5D6A7;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      background: #C8E6C9;
+      transform: translateY(-1px);
+    }
+
+    /* Recommendation Cards */
+    .rec-card {
+      background: white;
+      border: 1.5px solid #81C784;
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .rec-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .rec-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #E8F5E9;
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    .rec-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .rec-reasons {
+      font-size: 11.5px;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .rec-reasons li {
+      list-style: none;
+      padding-left: 14px;
+      position: relative;
+      margin-bottom: 3px;
+    }
+
+    .rec-reasons li::before {
+      content: "•";
+      color: var(--primary);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .rec-tip {
+      font-size: 11px;
+      background: #FFFBEB;
+      color: #B45309;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border-left: 3px solid #F59E0B;
+      font-style: italic;
+    }
+
+    /* Thinking indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    /* Input Box Area */
+    .input-bar {
+      background: white;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-bar input {
+      flex: 1;
+      background: #F1F5F9;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .input-bar input:focus {
+      background: #E2E8F0;
+    }
+
+    .btn-send {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-send:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <h1>🌾 Crop Recommendation Chatbot</h1>
+    <p>Live Learning MVP • Mobile Simulator connected to Flask Backend</p>
+  </div>
+
+  <div class="phone-mockup">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>📶 5G 100%</span>
+    </div>
+
+    <!-- App Bar -->
+    <div class="app-bar">
+      <div class="app-bar-left">
+        <div class="avatar">🌱</div>
+        <div>
+          <div class="app-title">Crop Advisor Bot</div>
+          <div class="server-status">
+            <div class="status-dot"></div>
+            <span>Flask Backend Active</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-reset" onclick="startConversation()">🔄 Restart</button>
+    </div>
+
+    <!-- Chat Messages Container -->
+    <div class="chat-messages" id="chatContainer"></div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <input type="text" id="userInput" placeholder="Type your answer here..." onkeypress="handleKeyPress(event)" />
+      <button class="btn-send" onclick="sendUserMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+    // Crop Data State
+    let cropData = {
+      soil_type: "",
+      temperature: null,
+      rainfall: null,
+      humidity: null,
+      ph: null,
+      season: "",
+      location: ""
+    };
+
+    let currentStep = 0;
+    const chatContainer = document.getElementById("chatContainer");
+    const userInput = document.getElementById("userInput");
+
+    function scrollToBottom() {
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }, 50);
+    }
+
+    function addBotMessage(text, quickReplies = [], recommendations = []) {
+      const row = document.createElement("div");
+      row.className = "message-row bot";
+
+      let innerHTML = `
+        <div class="bot-icon">🌾</div>
+        <div class="bubble">
+          <div>${text.replace(/\n/g, '<br>')}</div>
+      `;
+
+      if (recommendations && recommendations.length > 0) {
+        recommendations.forEach(rec => {
+          const isHigh = rec.score >= 75;
+          innerHTML += `
+            <div class="rec-card" style="border-color: ${isHigh ? '#81C784' : '#FFB74D'}">
+              <div class="rec-header">
+                <span class="rec-title">${rec.crop}</span>
+                <span class="rec-badge" style="color: ${isHigh ? '#2E7D32' : '#E65100'}; background: ${isHigh ? '#E8F5E9' : '#FFF3E0'}">
+                  ${rec.score}% Match
+                </span>
+              </div>
+              <div class="rec-desc">${rec.description}</div>
+              <div class="rec-reasons">
+                <strong>Why it fits:</strong>
+                ${rec.reasons.map(r => `<li>${r}</li>`).join('')}
+              </div>
+              ${rec.tips ? `<div class="rec-tip">💡 <strong>Farming Tip:</strong> ${rec.tips}</div>` : ''}
+            </div>
+          `;
+        });
+      }
+
+      if (quickReplies && quickReplies.length > 0) {
+        innerHTML += `<div class="quick-replies">`;
+        quickReplies.forEach(reply => {
+          innerHTML += `<button class="chip" onclick="handleQuickReply('${reply}')">${reply}</button>`;
+        });
+        innerHTML += `</div>`;
+      }
+
+      innerHTML += `</div>`;
+      row.innerHTML = innerHTML;
+      chatContainer.appendChild(row);
+      scrollToBottom();
+    }
+
+    function addUserMessage(text) {
+      const row = document.createElement("div");
+      row.className = "message-row user";
+      row.innerHTML = `<div class="bubble">${text}</div>`;
+      chatContainer.appendChild(row);
+      scrollToBottom();
+    }
+
+    function addTypingIndicator() {
+      const row = document.createElement("div");
+      row.id = "typingIndicator";
+      row.className = "message-row bot";
+      row.innerHTML = `
+        <div class="bot-icon">🌾</div>
+        <div class="bubble typing-indicator">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      `;
+      chatContainer.appendChild(row);
+      scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+      const indicator = document.getElementById("typingIndicator");
+      if (indicator) indicator.remove();
+    }
+
+    function startConversation() {
+      chatContainer.innerHTML = "";
+      cropData = { soil_type: "", temperature: null, rainfall: null, humidity: null, ph: null, season: "", location: "" };
+      currentStep = 0;
+
+      addBotMessage(
+        "Hello! I am your Crop Recommendation Assistant.\n\nI will ask you a few simple questions about your soil and weather to recommend suitable crops.\n\nLet's start: What is your **Soil Type**?",
+        ["Clay", "Loamy", "Sandy", "Black", "Red", "Alluvial"]
+      );
+    }
+
+    function handleQuickReply(value) {
+      if (value === "Start Over" || value === "Try Again") {
+        startConversation();
+      } else {
+        processUserAnswer(value);
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === "Enter") {
+        sendUserMessage();
+      }
+    }
+
+    function sendUserMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      userInput.value = "";
+      processUserAnswer(text);
+    }
+
+    function processUserAnswer(input) {
+      addUserMessage(input);
+
+      switch (currentStep) {
+        case 0: // Soil
+          cropData.soil_type = input;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "Great! What is the average **Temperature** in °C?\n(e.g., 25 or 30)",
+              ["18", "24", "28", "32"]
+            );
+          }, 300);
+          break;
+
+        case 1: // Temperature
+          const temp = parseFloat(input);
+          if (isNaN(temp) || temp < -10 || temp > 60) {
+            setTimeout(() => addBotMessage("Please enter a valid temperature number between -10°C and 60°C (e.g., 26)."), 300);
+            return;
+          }
+          cropData.temperature = temp;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "Got it! What is the annual or seasonal **Rainfall** in mm?\n(e.g., 500 for moderate, 1200 for high rain)",
+              ["400", "700", "1100", "1600"]
+            );
+          }, 300);
+          break;
+
+        case 2: // Rainfall
+          const rain = parseFloat(input);
+          if (isNaN(rain) || rain < 0 || rain > 5000) {
+            setTimeout(() => addBotMessage("Please enter a valid rainfall number in mm (e.g., 800)."), 300);
+            return;
+          }
+          cropData.rainfall = rain;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "What is the average **Humidity** percentage (%)\n(e.g., 50 for dry, 80 for humid)",
+              ["40", "55", "70", "85"]
+            );
+          }, 300);
+          break;
+
+        case 3: // Humidity
+          const humidity = parseFloat(input);
+          if (isNaN(humidity) || humidity < 0 || humidity > 100) {
+            setTimeout(() => addBotMessage("Please enter a valid humidity number between 0 and 100 (e.g., 65)."), 300);
+            return;
+          }
+          cropData.humidity = humidity;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "What is the **Soil pH** value?\n(7 is neutral, below 7 is acidic, above 7 is alkaline)",
+              ["5.5", "6.5", "7.0", "7.5"]
+            );
+          }, 300);
+          break;
+
+        case 4: // pH
+          const ph = parseFloat(input);
+          if (isNaN(ph) || ph < 0 || ph > 14) {
+            setTimeout(() => addBotMessage("Please enter a valid pH value between 0 and 14 (e.g., 6.5)."), 300);
+            return;
+          }
+          cropData.ph = ph;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "Which **Season** are you planting for?",
+              ["Kharif (Monsoon)", "Rabi (Winter)", "Summer / Zaid"]
+            );
+          }, 300);
+          break;
+
+        case 5: // Season
+          cropData.season = input;
+          currentStep++;
+          setTimeout(() => {
+            addBotMessage(
+              "Almost finished! What is your **Location / Region**? (Or tap Skip)",
+              ["Plains", "Coastal", "Plateau", "Skip"]
+            );
+          }, 300);
+          break;
+
+        case 6: // Region & Submit to API
+          cropData.location = input.toLowerCase() === "skip" ? "" : input;
+          currentStep++;
+          submitToBackend();
+          break;
+      }
+    }
+
+    async function submitToBackend() {
+      addTypingIndicator();
+
+      try {
+        const response = await fetch("/api/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cropData)
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        if (response.ok && data.status === "success") {
+          addBotMessage(
+            `Here are the top crop recommendations based on your conditions:`,
+            ["Start Over"],
+            data.recommendations
+          );
+        } else {
+          addBotMessage(`⚠️ ${data.message || 'Could not calculate recommendations.'}`, ["Try Again"]);
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        addBotMessage(`❌ Could not connect to the backend server. Error: ${err.message}`, ["Try Again"]);
+      }
+    }
+
+    // Launch initial chat on load
+    startConversation();
+  </script>
+</body>
+</html>
